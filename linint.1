@@ -1,0 +1,56 @@
+.TH LININT "1" "July 2026" "linint v1.0.0" "User Commands"
+.SH NAME
+linint \- linear interpolation
+.SH SYNOPSIS
+.SY
+.B linint
+[\fI\,OPTION\/\fR]... \fB\,\-x\/\fR=\fI\,X1\/\fR \fB\,\-X\/\fR=\fI\,X2\/\fR \fB\,\-y\/\fR=\fI\,Y1\/\fR \fB\,\-Y\/\fR=\fI\,Y2\/\fR [\fI\,X\/\fR]...
+.YS
+.SH DESCRIPTION
+.B linint
+performs linear interpolation on input \fIX\fR-values, given the two points (\fIX1\fR, \fIY1\fR) and (\fIX2\fR, \fIY2\fR) to define a line.
+Which point is point 1 and point 2 does not matter, such that \fIX2\fR can be greater or less than \fIX1\fR.
+However, \fIX1\fR and \fIX2\fR must not be equal.
+.PP
+Output is given as 'X: Y(X)\\n'.
+.PP
+If
+.I X
+is '\-', read X-values to interpolate Y-values from, from standard input.
+.PP
+N.B. this tool may be replaced by a better one also providing spline interpolation.
+.SH OPTIONS
+.TP
+\fB\-l\fR, \fB\-\-loose\-exit\-status\fR
+Change the behavior of the exit status.
+Normally, the program will exit non-zero if any invalid input is encountered.
+This flag will change the behavior such that the program will only exit non-zero if a fatal error is encountered.
+.TP
+\fB\-x\fR, \fB\-\-x1\fR=\fI\,X1\/\fR
+Set the value of \fIX1\fR, i.e. the X-value for the first point.
+.TP
+\fB\-X\fR, \fB\-\-x2\fR=\fI\,X1\/\fR
+Set the value of \fIX2\fR.
+.TP
+\fB\-y\fR, \fB\-\-y1\fR=\fI\,X1\/\fR
+Set the value of \fIY1\fR.
+.TP
+\fB\-Y\fR, \fB\-\-y2\fR=\fI\,X1\/\fR
+Set the value of \fIY2\fR.
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Disable the printing of X with the computed Y(X).
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print a short help message and exit.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Print version information and exit.
+.SH AUTHOR
+Written by Jack R. Uteg.
+.SH COPYRIGHT
+Copyright \(co 2026 Jack Renton Uteg.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.

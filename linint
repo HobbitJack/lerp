@@ -1,0 +1,124 @@
+#!/usr/bin/python
+# chart two-variable data
+
+import getopt
+import os
+import stat
+import string
+import sys
+
+PROGNAME = os.path.basename(sys.argv[0])
+STATUS = 0
+
+LOOSE_EXIT_STATUS = False
+QUIET = False
+SILENT = False
+
+X1 = None
+X2 = None
+Y1 = None
+Y2 = None
+
+def try_float(num: str):
+	try:
+		return float(num)
+	except ValueError:
+		STATUS = 1
+		if not SILENT:
+			print("{PROGNAME}: {num}: Could not parse as float", file=sys.stderr)
+		return False
+
+def interpolate(x, x1, x2, y1, y2):
+	return (y1*(x2-x) + y2*(x-x1))/(x2-x1)
+
+short_options = "lqsx:X:y:Y:hv"
+long_options = [
+	"loose-exit-status",
+	"quiet",
+	"silent",
+	"x1=",
+	"x2=",
+	"y1=",
+	"y2="
+	"help",
+	"version",
+]
+
+try:
+	opts, args = getopt.gnu_getopt([arg.replace("-", "_") if arg[1] in string.digits else arg for arg in sys.argv[1:]], short_options, long_options)
+except getopt.GetoptError as error:
+	print(f"chart: '-{error.opt}': Option not recognized", file=sys.stderr)
+	sys.exit(1)
+
+for opt, arg in opts:
+	if opt == "-l" or opt == "--loose-exit-status":
+		LOOSE_EXIT_STATUS = True
+	elif opt == "-q" or opt == "--quiet":
+		QUIET = True
+	elif opt == "-s" or opt == "--silent":
+		SILENT = True
+	elif opt == "-x" or opt == "--x1":
+		if not (X1 := try_float(arg)):
+			sys.exit(1)
+	elif opt == "-X" or opt == "--x2":
+		if not (X2 := try_float(arg)):
+			sys.exit(1)
+	elif opt == "-y" or opt == "--y1":
+		if not (Y1 := try_float(arg)):
+			sys.exit(1)
+	elif opt == "-Y" or opt == "--y2":
+		if not (Y2 := try_float(arg)):
+			sys.exit(1)
+	elif opt == "-h" or opt == "--help":
+		print(f"{PROGNAME} [OPTION]... -xX1 -yY1 -XX2 -YY2 [X]...")
+		print("Linearly interpolate X-values on the line defined by (X1, Y1) and (X2, Y2).")
+		print("When no Xs given, read X-values from standard input.")
+		print()
+		print("Options:")
+		print("  -l, --loose-exit-status    Exit 0 even if invalid input encountered")
+		print("  -q, --quiet                Do not print X values before Ys.")
+		print("  -x, --x1=X1                First point has X-value X1")
+		print("  -X, --x2=X2                Second point has X-value X2")
+		print("  -y, --y1=Y1                First point has Y-value Y1")
+		print("  -Y, --y2=Y2                Second point has Y-value Y2")		
+		print()
+		print("Getting help:")
+		print("  -h, --help                 Print this help message and exit")
+		print("  -v, --version              Print version information and exit")
+		print()
+		print(f"Try 'man {PROGNAME}' for more information.")
+		sys.exit(0)
+	elif opt == "-v" or opt == "--version":
+		print(f"{PROGNAME} v1.0.0")
+		print()
+		print("Copyright (C) 2026 Jack Renton Uteg.")
+		print("License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.")
+		print("This is free software: you are free to change and redistribute it.")
+		print("There is NO WARRANTY, to the extent permitted by law.")
+		print()
+		print("Written by Jack R. Uteg.")
+
+if not all([X1, Y1, X2, Y2]):
+	print("f{PROGNAME}: Need X1, X2, Y1, Y2", file=sys.stderr)
+	sys.exit(1)
+
+if X1 == X2:
+	print("f{PROGNAME}: X1 == X2", file=sys.stderr)
+	sys.exit(1)
+
+if len(args) > 0 and args[0] != "_":
+	for x in args:
+		x = try_float(x.replace("_", "-"))
+		if x is False:
+			continue
+
+		print(f"{'' if QUIET else str(x)}{'' if QUIET else ': '}{interpolate(x, X1, X2, Y1, Y2)}")
+	sys.exit(0 if LOOSE_EXIT_STATUS else STATUS)
+
+while line := sys.stdin.readline():
+	x = try_float(x)
+	if x is False:
+		continue
+
+	print(f"{'' if not QUIET else str(x)}{'' if QUIET else ': '}{interpolate(x, X1, X2, Y1, Y2)}")
+sys.exit(0 if LOOSE_EXIT_STATUS else STATUS)

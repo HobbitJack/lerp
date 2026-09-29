@@ -45,7 +45,7 @@ long_options = [
 ]
 
 try:
-	opts, args = getopt.gnu_getopt([arg.replace("-", "_") if arg[1] in string.digits else arg for arg in sys.argv[1:]], short_options, long_options)
+	opts, args = getopt.gnu_getopt([arg.replace("-", "_") if (len(arg)>1 and arg[1] in string.digits) else arg for arg in sys.argv[1:]], short_options, long_options)
 except getopt.GetoptError as error:
 	print(f"chart: '-{error.opt}': Option not recognized", file=sys.stderr)
 	sys.exit(1)
@@ -58,16 +58,20 @@ for opt, arg in opts:
 	elif opt == "-s" or opt == "--silent":
 		SILENT = True
 	elif opt == "-x" or opt == "--x1":
-		if not (X1 := try_float(arg)):
+		if not isinstance(X1 := try_float(arg), float):
+			print(f"{PROGNAME}: {arg}: Invalid float")
 			sys.exit(1)
 	elif opt == "-X" or opt == "--x2":
-		if not (X2 := try_float(arg)):
+		if not isinstance(X2 := try_float(arg), float):
+			print(f"{PROGNAME}: {arg}: Invalid float")
 			sys.exit(1)
 	elif opt == "-y" or opt == "--y1":
-		if not (Y1 := try_float(arg)):
+		if not isinstance(Y1 := try_float(arg), float):
+			print(f"{PROGNAME}: {arg}: Invalid float")
 			sys.exit(1)
 	elif opt == "-Y" or opt == "--y2":
-		if not (Y2 := try_float(arg)):
+		if not isinstance(Y2 := try_float(arg), float):
+			print(f"{PROGNAME}: {arg}: Invalid float")
 			sys.exit(1)
 	elif opt == "-h" or opt == "--help":
 		print(f"{PROGNAME} [OPTION]... -xX1 -yY1 -XX2 -YY2 [X]...")
@@ -89,7 +93,7 @@ for opt, arg in opts:
 		print(f"Try 'man {PROGNAME}' for more information.")
 		sys.exit(0)
 	elif opt == "-v" or opt == "--version":
-		print(f"{PROGNAME} v1.0.0")
+		print(f"{PROGNAME} v1.0.1")
 		print()
 		print("Copyright (C) 2026 Jack Renton Uteg.")
 		print("License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.")
@@ -98,12 +102,12 @@ for opt, arg in opts:
 		print()
 		print("Written by Jack R. Uteg.")
 
-if not all([X1, Y1, X2, Y2]):
-	print("f{PROGNAME}: Need X1, X2, Y1, Y2", file=sys.stderr)
+if not all([isinstance(v, float) for v in [X1, Y1, X2, Y2]]):
+	print(f"{PROGNAME}: Need X1, X2, Y1, Y2", file=sys.stderr)
 	sys.exit(1)
 
 if X1 == X2:
-	print("f{PROGNAME}: X1 == X2", file=sys.stderr)
+	print(f"{PROGNAME}: X1 == X2", file=sys.stderr)
 	sys.exit(1)
 
 if len(args) > 0 and args[0] != "_":
@@ -116,9 +120,9 @@ if len(args) > 0 and args[0] != "_":
 	sys.exit(0 if LOOSE_EXIT_STATUS else STATUS)
 
 while line := sys.stdin.readline():
-	x = try_float(x)
+	x = try_float(line)
 	if x is False:
 		continue
 
-	print(f"{'' if not QUIET else str(x)}{'' if QUIET else ': '}{interpolate(x, X1, X2, Y1, Y2)}")
+	print(f"{'' if QUIET else str(x)}{'' if QUIET else ': '}{interpolate(x, X1, X2, Y1, Y2)}")
 sys.exit(0 if LOOSE_EXIT_STATUS else STATUS)
